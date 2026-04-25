@@ -78,7 +78,7 @@ def parse_hsbc(pdf_bytes):
         if tx.get("currency") and tx["currency"] != "TWD" and tx.get("foreign_amount"):
             fa = tx["foreign_amount"]
             twd = abs(tx["amount_twd"])
-            tx["exchange_rate"] = round(twd / fa, 4) if fa else 1.0
+            tx["exchange_rate"] = round(fa / twd, 4) if twd else 1.0
         else:
             tx["exchange_rate"] = 1.0
 
