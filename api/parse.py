@@ -224,8 +224,9 @@ class handler(BaseHTTPRequestHandler):
 
     def do_POST(self):
         try:
-            length = int(self.headers.get("Content-Length", 0))
-            body = json.loads(self.rfile.read(length))
+            length = int(self.headers.get("Content-Length") or 0)
+            raw = self.rfile.read(length)
+            body = json.loads(raw)
 
             pdf_bytes = base64.b64decode(body["pdf_base64"])
             rules = body.get("rules", [])
@@ -235,7 +236,8 @@ class handler(BaseHTTPRequestHandler):
 
             self._respond(200, result)
         except Exception as e:
-            self._respond(500, {"error": str(e)})
+            import traceback
+            self._respond(200, {"error": str(e), "detail": traceback.format_exc()})
 
     def _respond(self, code, data):
         payload = json.dumps(data, ensure_ascii=False).encode("utf-8")

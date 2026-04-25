@@ -37,8 +37,10 @@ export default function HomePage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ pdf_base64: base64.split(",")[1], rules }),
       });
-      if (!res.ok) { const e = await res.json(); throw new Error(e.error || "解析失敗"); }
-      const parsed = await res.json();
+      const text = await res.text();
+      let parsed;
+      try { parsed = JSON.parse(text); } catch { throw new Error("API 回應非 JSON：" + text.slice(0, 200)); }
+      if (parsed.error) throw new Error(parsed.error + (parsed.detail ? "\n" + parsed.detail.slice(0, 300) : ""));
 
       // 存到 Supabase
       const { data: saved, error: dbErr } = await supabase.from("statements").insert({
